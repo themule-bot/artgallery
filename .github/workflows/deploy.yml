@@ -1,39 +1,44 @@
 name: CI Pipeline
 
-#När ska den köras?
+# När ska den köras?
 on:
-    push:
-        branches: [ main ]
-    pull_request:
-        branches [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-#Vad ska den göra?
+# Vad ska den göra?
 jobs:
-    validate:
-        runs-on: ubuntu-latest
-        steps:
-            #Steg1 hämta kod
-            - name: Checkout code
-              uses: actions/checkout@v4
-            #Steg2 kolla om docker-compose.yml är giltig
-            - name: Validate docker-compose
-              run: |
-                docker compose config
-            #Steg3 kolla att index.html finns
-            - name: Check index.html exists
-              run: |
-                if [ ! -f html/index.html ]; then
-                  echo "ERROR: index.html saknas!"
-                  exit 1
-                fi
-                echo "index.html finns[V]"
-            #Steg4 bygg Docker image och kolla att den funkar
-            -  name: Build Docker image
-               run: |
-                 docker build -t fotogalleri:test . || echo "Ingen DockeFile - skippar build"
-            #Steg5 skriv ut lite info
-            - name: Done
-              run: |
-                echo "Pipeline klar!"
-                echo "Commit: ${{ github.sha }}"
-                echo "Branch: ${{ github.ref.name}}"
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Steg 1: Hämta koden
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Steg 2: Kolla att docker-compose.yml är giltig
+      - name: Validate docker-compose
+        run: |
+          docker compose config
+
+      # Steg 3: Kolla att index.html finns
+      - name: Check index.html exists
+        run: |
+          if [ ! -f html/index.html ]; then
+            echo "ERROR: index.html saknas!"
+            exit 1
+          fi
+          echo "index.html finns ✅"
+
+      # Steg 4: Bygg Docker image och kolla att det funkar
+      - name: Build Docker image
+        run: |
+          docker build -t fotogalleri:test . || echo "Ingen Dockerfile — skippar build"
+
+      # Steg 5: Skriv ut lite info
+      - name: Done
+        run: |
+          echo "Pipeline klar!"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
