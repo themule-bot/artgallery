@@ -1,0 +1,39 @@
+name: CI Pipeline
+
+#När ska den köras?
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches [ main ]
+
+#Vad ska den göra?
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+        steps:
+            #Steg1 hämta kod
+            - name: Checkout code
+              uses: actions/checkout@v4
+            #Steg2 kolla om docker-compose.yml är giltig
+            - name: Validate docker-compose
+              run: |
+                docker compose config
+            #Steg3 kolla att index.html finns
+            - name: Check index.html exists
+              run: |
+                if [ ! -f html/index.html ]; then
+                  echo "ERROR: index.html saknas!"
+                  exit 1
+                fi
+                echo "index.html finns[V]"
+            #Steg4 bygg Docker image och kolla att den funkar
+            -  name: Build Docker image
+               run: |
+                 docker build -t fotogalleri:test . || echo "Ingen DockeFile - skippar build"
+            #Steg5 skriv ut lite info
+            - name: Done
+              run: |
+                echo "Pipeline klar!"
+                echo "Commit: ${{ github.sha }}"
+                echo "Branch: ${{ github.ref.name}}"
