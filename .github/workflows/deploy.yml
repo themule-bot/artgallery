@@ -35,11 +35,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t fotogalleri:${{ github.sha }} .
-          echo "Image byggd: fotogalleri:${{ github.sha }}"
+          docker build -t artgalleri:${{ github.sha }} .
+          echo "Image byggd: artgalleri:${{ github.sha }}"
 
       - name: Image info
         run: |
-          docker images fotogalleri
+          docker images artgalleri
           echo "Commit: ${{ github.sha }}"
           echo "Branch: ${{ github.ref_name }}"
