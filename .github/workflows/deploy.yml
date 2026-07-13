@@ -1,28 +1,22 @@
 name: CI Pipeline
 
-# När ska den köras?
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# Vad ska den göra?
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      # Steg 1: Hämta koden
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Steg 2: Kolla att docker-compose.yml är giltig
       - name: Validate docker-compose
-        run: |
-          docker compose config
+        run: docker compose config
 
-      # Steg 3: Kolla att index.html finns
       - name: Check index.html exists
         run: |
           if [ ! -f html/index.html ]; then
@@ -31,14 +25,21 @@ jobs:
           fi
           echo "index.html finns ✅"
 
-      # Steg 4: Bygg Docker image och kolla att det funkar
+  build:
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Build Docker image
         run: |
-          docker build -t fotogalleri:test . || echo "Ingen Dockerfile — skippar build"
+          docker build -t fotogalleri:${{ github.sha }} .
+          echo "Image byggd: fotogalleri:${{ github.sha }}"
 
-      # Steg 5: Skriv ut lite info
-      - name: Done
+      - name: Image info
         run: |
-          echo "Pipeline klar!"
+          docker images fotogalleri
           echo "Commit: ${{ github.sha }}"
           echo "Branch: ${{ github.ref_name }}"
